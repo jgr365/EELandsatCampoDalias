@@ -18,12 +18,10 @@ app.createPanels = function () {
     selectWidget: ui.Select({
       items: [],
       placeholder: 'Find any Images first',
-      disabled: true
     }),
     btn_addImage: ui.Button({
       label: 'Add',
       onClick: app.commands.addImage,
-      disabled: true
     })
   };
   app.imageSelection.panel = ui.Panel([
@@ -32,32 +30,32 @@ app.createPanels = function () {
     app.imageSelection.btn_addImage
   ]);
 
-  app.imageAreaComputation = {
-    selectWidget: ui.Select({
-      items: [],
-      placeholder: 'Find images first',
-    }),
-    btn_computeArea: ui.Button('Compute', app.commands.computeArea),
-    btn_drawImage: ui.Button('Draw', app.commands.drawImage)
-  };
-  app.imageAreaComputation.panel = ui.Panel([
-    app.imageAreaComputation.selectWidget,
-    app.imageAreaComputation.btn_computeArea,
-    app.imageAreaComputation.btn_drawImage
-  ]);
+  //   app.imageAreaComputation = {
+  //     selectWidget: ui.Select({
+  //       items: [],
+  //       placeholder: 'Find images first',
+  //     }),
+  //     btn_computeArea: ui.Button('Compute', app.commands.computeArea),
+  //     btn_drawImage: ui.Button('Draw', app.commands.drawImage)
+  //   };
+  //   app.imageAreaComputation.panel = ui.Panel([
+  //     app.imageAreaComputation.selectWidget,
+  //     app.imageAreaComputation.btn_computeArea,
+  //     app.imageAreaComputation.btn_drawImage
+  //   ]);
 
-  app.imageComparison = {
-    //TODO
-    slt_imageA: ui.Select({
-      items: app.model.selectedImages,
-      placeholder: 'Pick an Image'
-    }),
-    slt_imageB: ui.Select({
-      items: app.model.selectedImages,
-      placeholder: 'Pick a later Image'
-    }),
-    btn_compare: ui.Button('Compare', app.commands.compareImages)
-  };
+  //   app.imageComparison = {
+  //     //TODO
+  //     slt_imageA: ui.Select({
+  //       items: app.model.selectedImages,
+  //       placeholder: 'Pick an Image'
+  //     }),
+  //     slt_imageB: ui.Select({
+  //       items: app.model.selectedImages,
+  //       placeholder: 'Pick a later Image'
+  //     }),
+  //     btn_compare: ui.Button('Compare', app.commands.compareImages)
+  //   };
 };
 
 app.createHelpers = function () {
@@ -119,7 +117,7 @@ app.createHelpers = function () {
       print('Area covered: (in m2)', areaExtension);
     },
     buscarImagenes: function (startDate, endDate, onFoundImagesCallback) {
-      var collectionID = app.IMAGE_COLLECTION_ID;
+      var collectionID = app.constants.IMAGE_COLLECTION_ID;
       var collection = ee.ImageCollection(collectionID);
 
       var filteredCollection = collection
@@ -164,7 +162,7 @@ app.createHelpers = function () {
       });
     },
     addImage: function () {
-      var imageCollectionID = 'LANDSAT/LC08/C01/T1_RT_TOA';
+      var imageCollectionID = app.constants.IMAGE_COLLECTION_ID;
       var imageInCollectionID = app.imageSelection.selectWidget.getValue();
       var label = imageInCollectionID;
       var uniqueImageID = imageCollectionID + imageInCollectionID;
@@ -185,7 +183,7 @@ app.createHelpers = function () {
 
       app.utils.dibujarImagen(image, visParams);
     },
-    compareImages: function(){
+    compareImages: function () {
 
     }
 
@@ -195,6 +193,7 @@ app.createHelpers = function () {
 
 app.createConstants = function () {
   app.constants = {
+    IMAGE_COLLECTION_ID: 'LANDSAT/LC08/C01/T1_RT_TOA',
     VISUALIZATION_PARAMS_NATURAL: { bands: ['B5', 'B4', 'B3'], min: 0, max: 30000 }
   };
 
@@ -211,16 +210,16 @@ app.createConstants = function () {
   };
 };
 
-app.boot = function (){
+app.boot = function () {
   app.createConstants();
   app.createHelpers();
   app.createPanels();
 
   var main = ui.Panel([
-    app.intro.panel, 
+    app.intro.panel,
     app.imageSelection.panel,
-    app.imageAreaComputation.panel,
-    app.imageComparison.panel
+    // app.imageAreaComputation.panel,
+    // app.imageComparison.panel
   ]);
 
   Map.setCenter(-2.74, 36.74, 9);
