@@ -64,6 +64,8 @@ app.createHelpers = function () {
       Map.addLayer(image, visParams);
     },
     detectarInvernaderos: function (image, region, rangesPerBand) {
+      var minIndex = 'min';
+      var maxIndex = 'max';
       var B3min = rangesPerBand['B3'][minIndex];
       var B3max = rangesPerBand['B3'][maxIndex];
       var InvernaderosImage;
@@ -90,6 +92,8 @@ app.createHelpers = function () {
     calcularAreaInvernada: function (image, region, rangesPerBand) {
       //COMPUTE AREA BASED ON HISTOGRAM
       var bandID = 'B3';
+      var minIndex = 'min';
+      var maxIndex = 'max';
       var minValue = rangesPerBand[bandID][minIndex];
       var maxValue = rangesPerBand[bandID][maxIndex];
       var reducer = ee.Reducer.fixedHistogram(minValue, maxValue, 1);
@@ -105,7 +109,7 @@ app.createHelpers = function () {
       var areaCovered;
       var pixelArea = 900;
       reduced.evaluate(function (dictionary) {
-        pixelsInRangePerBand = dictionary[bandID][0][1];
+        var pixelsInRangePerBand = dictionary[bandID][0][1];
 
         areaCovered = pixelsInRangePerBand * pixelArea;
         app.utils.comunicarAreaCalculada(areaCovered);
