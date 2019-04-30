@@ -30,19 +30,19 @@ app.createPanels = function () {
     app.imageSelection.btn_addImage
   ]);
 
-  //   app.imageAreaComputation = {
-  //     selectWidget: ui.Select({
-  //       items: [],
-  //       placeholder: 'Find images first',
-  //     }),
-  //     btn_computeArea: ui.Button('Compute', app.commands.computeArea),
-  //     btn_drawImage: ui.Button('Draw', app.commands.drawImage)
-  //   };
-  //   app.imageAreaComputation.panel = ui.Panel([
-  //     app.imageAreaComputation.selectWidget,
-  //     app.imageAreaComputation.btn_computeArea,
-  //     app.imageAreaComputation.btn_drawImage
-  //   ]);
+    app.imageAreaComputation = {
+      selectWidget: ui.Select({
+        items: [],
+        placeholder: 'Find images first',
+      }),
+      btn_computeArea: ui.Button('Compute', app.commands.computeArea),
+      btn_drawImage: ui.Button('Draw', app.commands.drawImage)
+    };
+    app.imageAreaComputation.panel = ui.Panel([
+      app.imageAreaComputation.selectWidget,
+      app.imageAreaComputation.btn_computeArea,
+      app.imageAreaComputation.btn_drawImage
+    ]);
 
   //   app.imageComparison = {
   //     //TODO
@@ -218,7 +218,7 @@ app.boot = function () {
   var main = ui.Panel([
     app.intro.panel,
     app.imageSelection.panel,
-    // app.imageAreaComputation.panel,
+    app.imageAreaComputation.panel,
     // app.imageComparison.panel
   ]);
 
