@@ -223,7 +223,7 @@ app.boot = function (){
     app.imageComparison.panel
   ]);
 
-  Map.setCentre(-2.74, 36.74, 9);
+  Map.setCenter(-2.74, 36.74, 9);
   ui.root.insert(0, main);
 };
 
