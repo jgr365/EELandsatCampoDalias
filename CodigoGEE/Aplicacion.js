@@ -198,7 +198,8 @@ app.createConstants = function () {
     VISUALIZATION_PARAMS_NATURAL: { bands: ['B5', 'B4', 'B3'], min: 0, max: 30000 }
   };
 
-  app.model.selectedImages = ee.ActiveList([]);
+  app.model = {};
+  app.model.selectedImages = ui.data.ActiveList([]);
   app.model.getRangesPerBand = function () {
     return {
       B3: { min: 25143, max: 27502 },
