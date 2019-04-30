@@ -165,9 +165,10 @@ app.createHelpers = function () {
       var imageCollectionID = app.constants.IMAGE_COLLECTION_ID;
       var imageInCollectionID = app.imageSelection.selectWidget.getValue();
       var label = imageInCollectionID;
-      var uniqueImageID = imageCollectionID + imageInCollectionID;
+      var uniqueImageID = imageCollectionID+'/'+imageInCollectionID;
       var image = ee.Image(uniqueImageID);
 
+      print(image);
       app.model.selectedImages.add({ label: label, value: image });
     },
     computeArea: function () {
