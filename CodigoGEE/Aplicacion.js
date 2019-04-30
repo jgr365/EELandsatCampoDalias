@@ -8,10 +8,13 @@ app.createPanels = function () {
     }),
     description: ui.Label('App description')
   };
-  app.intro.panel = ui.Panel([
-    app.intro.title,
-    app.intro.description
-  ]);
+  app.intro.panel = ui.Panel({
+    widgets: [
+      app.intro.title,
+      app.intro.description
+    ],
+    style: {width: '300px'}
+  });
 
   app.imageSelection = {
     btn_findImages: ui.Button('Find Images', app.commands.findImages),
@@ -90,9 +93,7 @@ app.createHelpers = function () {
       maximunThresholdImage = image.lt(max);
       unionThresholdImage = minimunThresholdImage.and(maximunThresholdImage);
 
-      identificationImage = image.updateMask(unionThresholdImage);
-
-      return identificationImage;
+      return unionThresholdImage;
     },
     calcularAreaInvernada: function (image, region, rangesPerBand) {
       //COMPUTE AREA BASED ON HISTOGRAM
@@ -151,14 +152,19 @@ app.createHelpers = function () {
       var invernaderosAsinB;
       var invernaderosBsinA;
 
+
       var comunes = invernaderosA.or(invernaderosB);
       invernaderosAsinB = invernaderosA.bitwiseXor(comunes);
       invernaderosBsinA = invernaderosB.bitwiseXor(comunes);
 
+      var invernaderosAsinBMasked = invernaderosAsinB.updateMask(invernaderosAsinB);
+      var invernaderosBsinAMasked = invernaderosBsinA.updateMask(invernaderosBsinA);
 
 
-      Map.addLayer(invernaderosAsinB, visParamsIncrementoA, 'Invernaderos A excluyentes');
-      Map.addLayer(invernaderosBsinA, visParamsIncrementoB, 'Invernaderos B excluyentes');
+      Map.addLayer(comunes, null, 'Invernadores comunes');
+
+      Map.addLayer(invernaderosAsinBMasked, visParamsIncrementoA, 'Invernaderos A excluyentes');
+      Map.addLayer(invernaderosBsinAMasked, visParamsIncrementoB, 'Invernaderos B excluyentes');
     }
   };
 
@@ -204,6 +210,19 @@ app.createHelpers = function () {
       app.utils.dibujarImagen(image, visParams);
     },
     compareImages: function () {
+      var imageA = app.imageComparison.slt_imageA.getValue();
+      var imageB = app.imageComparison.slt_imageB.getValue();
+      var region = app.model.getExplorationZone();
+      var rangesPerBand = app.model.getRangesPerBand();
+
+      var invernaderosA;
+      var invernaderosB;
+
+      invernaderosA = app.utils.detectarInvernaderos( imageA, region, rangesPerBand);
+      invernaderosB = app.utils.detectarInvernaderos( imageB, region, rangesPerBand);
+
+      app.utils.representarDiferencias(invernaderosA, invernaderosB);
+
 
     }
 
