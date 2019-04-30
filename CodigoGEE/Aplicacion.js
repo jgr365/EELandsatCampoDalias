@@ -32,7 +32,7 @@ app.createPanels = function () {
 
     app.imageAreaComputation = {
       selectWidget: ui.Select({
-        items: [],
+        items: app.model.selectedImages,
         placeholder: 'Find images first',
       }),
       btn_computeArea: ui.Button('Compute', app.commands.computeArea),
@@ -167,9 +167,18 @@ app.createHelpers = function () {
       var label = imageInCollectionID;
       var uniqueImageID = imageCollectionID+'/'+imageInCollectionID;
       var image = ee.Image(uniqueImageID);
+      var selectedImages = app.model.selectedImages;
 
       print(image);
-      app.model.selectedImages.add({ label: label, value: image });
+      var object = { label: label, value: image };
+      print(object);
+      print(object.value);
+
+      //ACTUALIZAR LOS UI.WIDGETS QUE DEPENDEN DE LAS IMAGENES SELECCIONADAS
+      selectedImages.push(object);
+      app.imageAreaComputation.selectWidget.items().reset( selectedImages );
+      // app.imageComparison.slt_imageA.items().reset( selectedImages );
+      // app.imageComparison.slt_imageB.items().reset( selectedImages );
     },
     computeArea: function () {
       var image = app.imageAreaComputation.selectWidget.getValue();
@@ -180,7 +189,7 @@ app.createHelpers = function () {
     },
     drawImage: function () {
       var image = app.imageAreaComputation.selectWidget.getValue();
-      var visParams = app.constants.VISUALIZATION_PARAMS_NATURAL;
+      var visParams = app.constants.VISUALIZATION_PARAMS_NORMALIZED_NATURAL;
 
       app.utils.dibujarImagen(image, visParams);
     },
@@ -195,14 +204,18 @@ app.createHelpers = function () {
 app.createConstants = function () {
   app.constants = {
     IMAGE_COLLECTION_ID: 'LANDSAT/LC08/C01/T1_RT_TOA',
-    VISUALIZATION_PARAMS_NATURAL: { bands: ['B5', 'B4', 'B3'], min: 0, max: 30000 }
+    VISUALIZATION_PARAMS_NATURAL: { bands: ['B5', 'B4', 'B3'], min: 0, max: 30000 },
+    VISUALIZATION_PARAMS_NORMALIZED_NATURAL: { bands: ['B3'], min:0, max:30000/65535 },
+
+    DEBUG_VISUALIZATION_PARAMS_BAND_3: {bands: ['B3'], min:0, max:30000}
   };
 
   app.model = {};
-  app.model.selectedImages = ui.data.ActiveList([]);
+  app.model.selectedImages = [];
   app.model.getRangesPerBand = function () {
+    var normalizationFactor = 65535;
     return {
-      B3: { min: 25143, max: 27502 },
+      B3: { min: 25143/normalizationFactor, max: 27502/normalizationFactor },
       B10: { min: 24930, max: 25389 }
     };
   };
