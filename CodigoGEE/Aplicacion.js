@@ -76,8 +76,8 @@ app.createPanels = function () {
 
 app.createHelpers = function () {
   app.utils = {
-    dibujarImagen: function (image, visParams) {
-      Map.addLayer(image, visParams);
+    dibujarImagen: function (image, visParams, layerName) {
+      Map.addLayer(image, visParams, layerName);
     },
     detectarInvernaderos: function (image, region, rangesPerBand) {
       var minIndex = 'min';
@@ -215,8 +215,10 @@ app.createHelpers = function () {
     drawImage: function () {
       var image = app.imageAreaComputation.selectWidget.getValue();
       var visParams = app.constants.VISUALIZATION_PARAMS_NORMALIZED_NATURAL;
+      var layerName = image.get('system:index');
+      layerName = layerName.getInfo();
 
-      app.utils.dibujarImagen(image, visParams);
+      app.utils.dibujarImagen(image, visParams, layerName);
     },
     compareImages: function () {
       var imageA = app.imageComparison.slt_imageA.getValue();
@@ -242,8 +244,8 @@ app.createHelpers = function () {
 app.createConstants = function () {
   app.constants = {
     IMAGE_COLLECTION_ID: 'LANDSAT/LC08/C01/T1_RT_TOA',
-    VISUALIZATION_PARAMS_NATURAL: { bands: ['B5', 'B4', 'B3'], min: 0, max: 30000 },
-    VISUALIZATION_PARAMS_NORMALIZED_NATURAL: { bands: ['B3'], min: 0, max: 30000 / 65535 },
+    VISUALIZATION_PARAMS_NATURAL: { bands: ['B4', 'B3', 'B2'], min: 0, max: 30000 },
+    VISUALIZATION_PARAMS_NORMALIZED_NATURAL: { bands: ['B4', 'B3', 'B2'], min: 0, max: 30000 / 65535 },
 
     DEBUG_VISUALIZATION_PARAMS_BAND_3: { bands: ['B3'], min: 0, max: 30000 }
   };
