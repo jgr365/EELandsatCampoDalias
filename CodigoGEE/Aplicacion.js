@@ -24,7 +24,7 @@ app.createPanels = function () {
       placeholder: 'Find any Images first',
     }),
     btn_addImage: ui.Button({
-      label: 'Add',
+      label: 'Add to Image Manager',
       onClick: app.commands.addImage,
     })
   };
@@ -40,10 +40,11 @@ app.createPanels = function () {
     selectWidget: ui.Select({
       items: app.model.selectedImages,
       placeholder: 'Find and Add any image first',
+      disabled: true,
     }),
-    btn_computeArea: ui.Button('Compute', app.commands.computeArea),
+    btn_computeArea: ui.Button('Compute', app.commands.computeArea, true),
     lbl_areaResult: ui.Label('Area:'),
-    btn_drawImage: ui.Button('Draw', app.commands.drawImage)
+    btn_drawImage: ui.Button('Draw', app.commands.drawImage, true)
   };
   app.imageAreaComputation.panel = ui.Panel([
     app.imageAreaComputation.title,
@@ -58,13 +59,15 @@ app.createPanels = function () {
     title: ui.Label('3) Compare Images'),
     slt_imageA: ui.Select({
       items: app.model.selectedImages,
-      placeholder: 'Pick an added Image'
+      placeholder: 'Pick an added Image',
+      disabled: true
     }),
     slt_imageB: ui.Select({
       items: app.model.selectedImages,
-      placeholder: 'Pick an added more recent Image'
+      placeholder: 'Pick an added more recent Image',
+      disabled: true
     }),
-    btn_compare: ui.Button('Compare', app.commands.compareImages)
+    btn_compare: ui.Button('Compare', app.commands.compareImages, true)
   };
   app.imageComparison.panel = ui.Panel([
     app.imageComparison.title,
@@ -176,6 +179,22 @@ app.createHelpers = function () {
       Map.addLayer(invernaderosBsinAMasked, visParamsIncrementoB, 'Invernaderos B excluyentes');
     }
   };
+  app.utils.ui = {
+    enableImageComparisonWidgets: function(){
+      app.imageComparison.slt_imageA.setDisabled(false);
+      app.imageComparison.slt_imageB.setDisabled(false);
+      app.imageComparison.btn_compare.setDisabled(false);
+    },
+    enableImageAreaComputationWidgets: function() {
+      app.imageAreaComputation.selectWidget.setDisabled(false);
+      app.imageAreaComputation.btn_computeArea.setDisabled(false);
+      app.imageAreaComputation.btn_drawImage.setDisabled(false);
+    },
+    enableComponentsDependentOnAddedImages: function() {
+      app.utils.ui.enableImageAreaComputationWidgets();
+      app.utils.ui.enableImageComparisonWidgets();
+    }
+  }
 
   app.commands = {
     findImages: function () {
@@ -204,6 +223,8 @@ app.createHelpers = function () {
       app.imageAreaComputation.selectWidget.items().reset(selectedImages);
       app.imageComparison.slt_imageA.items().reset(selectedImages);
       app.imageComparison.slt_imageB.items().reset(selectedImages);
+
+      app.utils.ui.enableComponentsDependentOnAddedImages();
     },
     computeArea: function () {
       var image = app.imageAreaComputation.selectWidget.getValue();
