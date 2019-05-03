@@ -89,7 +89,22 @@ app.createHelpers = function () {
       var B3max = rangesPerBand['B3'][maxIndex];
       var InvernaderosImage;
 
-      InvernaderosImage = app.utils.detectarInvernaderosUsandoLaBanda3(image, region, B3min, B3max);
+      var bandsToUseForIdentification = [
+        // 'B1',
+        // 'B2', 
+        'B3',
+        'B4',
+        'B5',
+        // 'B6', 
+        // 'B7', 
+        // 'B8', 
+        // 'B9', 
+        // 'B10', 
+        // 'B11', 
+        // 'BQA'
+      ];
+
+      InvernaderosImage = app.utils.detectarInvernaderosUsandoLasBandas(image, region, bandsToUseForIdentification, rangesPerBand);
       return InvernaderosImage;
     },
     detectarInvernaderosUsandoLaBanda3: function (image, region, min, max) {
@@ -100,6 +115,36 @@ app.createHelpers = function () {
       var unionThresholdImage;
 
       image = image.select(bandID);
+      minimunThresholdImage = image.gt(min);
+      maximunThresholdImage = image.lt(max);
+      unionThresholdImage = minimunThresholdImage.and(maximunThresholdImage);
+
+      return unionThresholdImage;
+    },
+    detectarInvernaderosUsandoLasBandas: function (image, region, bandsKeys, rangesPerBand) {
+      var invernaderosMask;
+
+      var bandName;
+      for (bandName in bandsKeys) {
+        bandaDeInvernaderosMask = app.utils.detectarInvernaderosUsandoLaBanda(image, region, bandName, rangesPerBand);
+        if (!invernaderosMask) {
+          invernaderosMask = bandaDeInvernaderosMask;
+        } else {
+          invernaderosMask = invernaderosMask.and(bandaDeInvernaderosMask);
+        }
+      }
+
+      return invernaderosMask;
+    },
+    detectarInvernaderosUsandoLaBanda: function (image, region, bandKey, rangesPerBand) {
+      var min = rangesPerBand[bandKey].min;
+      var max = rangesPerBand[bandKey].max;
+      var minimunThresholdImage;
+      var maximunThresholdImage;
+      var unionThresholdImage;
+
+
+      image = image.select(bandKey);
       minimunThresholdImage = image.gt(min);
       maximunThresholdImage = image.lt(max);
       unionThresholdImage = minimunThresholdImage.and(maximunThresholdImage);
@@ -136,7 +181,7 @@ app.createHelpers = function () {
     },
     comunicarAreaCalculada: function (areaExtension) {
       var areaAsIntValue = parseInt(areaExtension);
-      app.imageAreaComputation.lbl_areaResult.setValue('GreenHose Area (in m2): '+areaAsIntValue);
+      app.imageAreaComputation.lbl_areaResult.setValue('GreenHose Area (in m2): ' + areaAsIntValue);
     },
     buscarImagenes: function (startDate, endDate, onFoundImagesCallback) {
       var collectionID = app.constants.IMAGE_COLLECTION_ID;
@@ -180,17 +225,17 @@ app.createHelpers = function () {
     }
   };
   app.utils.ui = {
-    enableImageComparisonWidgets: function(){
+    enableImageComparisonWidgets: function () {
       app.imageComparison.slt_imageA.setDisabled(false);
       app.imageComparison.slt_imageB.setDisabled(false);
       app.imageComparison.btn_compare.setDisabled(false);
     },
-    enableImageAreaComputationWidgets: function() {
+    enableImageAreaComputationWidgets: function () {
       app.imageAreaComputation.selectWidget.setDisabled(false);
       app.imageAreaComputation.btn_computeArea.setDisabled(false);
       app.imageAreaComputation.btn_drawImage.setDisabled(false);
     },
-    enableComponentsDependentOnAddedImages: function() {
+    enableComponentsDependentOnAddedImages: function () {
       app.utils.ui.enableImageAreaComputationWidgets();
       app.utils.ui.enableImageComparisonWidgets();
     }
@@ -244,7 +289,8 @@ app.createHelpers = function () {
     compareImages: function () {
       var imageA = app.imageComparison.slt_imageA.getValue();
       var imageB = app.imageComparison.slt_imageB.getValue();
-      var region = app.model.getExplorationZone();
+      // var region = app.model.getExplorationZone();
+      var region;
       var rangesPerBand = app.model.getRangesPerBand();
 
       var invernaderosA;
@@ -292,9 +338,9 @@ app.createConstants = function () {
       BQA: { min: 2800, max: 2800 }
     };
 
-    if(normalize){
+    if (normalize) {
       var bandKey;
-      for(bandKey in rangesPerBand){
+      for (bandKey in rangesPerBand) {
         rangesPerBand[bandKey].min /= normalizationFactor;
         rangesPerBand[bandKey].max /= normalizationFactor;
       }
