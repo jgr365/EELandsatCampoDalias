@@ -89,6 +89,8 @@ app.createHelpers = function () {
       var B3max = rangesPerBand['B3'][maxIndex];
       var InvernaderosImage;
 
+      print('Segunda oportunidad, en detectarInvernaderos', rangesPerBand);
+
       var bandsToUseForIdentification = [
         // 'B1',
         // 'B2', 
@@ -121,12 +123,14 @@ app.createHelpers = function () {
 
       return unionThresholdImage;
     },
-    detectarInvernaderosUsandoLasBandas: function (image, region, bandsKeys, rangesPerBand) {
+    detectarInvernaderosUsandoLasBandas: function (image, region, bandNames, rangesPerBand) {
       var invernaderosMask;
 
-      var bandName;
-      for (bandName in bandsKeys) {
-        bandaDeInvernaderosMask = app.utils.detectarInvernaderosUsandoLaBanda(image, region, bandName, rangesPerBand);
+      var bandaDeInvernaderosMask;
+      var index;
+      for (index in bandNames) {
+        print('bandName:', index);
+        bandaDeInvernaderosMask = app.utils.detectarInvernaderosUsandoLaBanda(image, region, bandNames[index], rangesPerBand);
         if (!invernaderosMask) {
           invernaderosMask = bandaDeInvernaderosMask;
         } else {
@@ -292,6 +296,8 @@ app.createHelpers = function () {
       // var region = app.model.getExplorationZone();
       var region;
       var rangesPerBand = app.model.getRangesPerBand();
+
+      print(rangesPerBand);
 
       var invernaderosA;
       var invernaderosB;
