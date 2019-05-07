@@ -18,6 +18,8 @@ app.createPanels = function () {
 
   app.imageSelection = {
     title: ui.Label('1) Find Near Images'),
+    text_startDate: ui.Textbox('YYYY-MM-DD', '2016-01-01'),
+    text_endDate: ui.Textbox('YYYY-MM-DD', '2016-12-31'),
     btn_findImages: ui.Button('Find Images', app.commands.findImages),
     selectWidget: ui.Select({
       items: [],
@@ -30,6 +32,8 @@ app.createPanels = function () {
   };
   app.imageSelection.panel = ui.Panel([
     app.imageSelection.title,
+    app.imageSelection.text_startDate,
+    app.imageSelection.text_endDate,
     app.imageSelection.btn_findImages,
     app.imageSelection.selectWidget,
     app.imageSelection.btn_addImage
@@ -198,8 +202,8 @@ app.createHelpers = function () {
 
   app.commands = {
     findImages: function () {
-      var startDate = '2016-01-01';
-      var endDate = '2016-12-31';
+      var startDate = app.model.getStartDate();
+      var endDate = app.model.getEndDate();
 
       app.utils.buscarImagenes(startDate, endDate, function (imageIDs) {
         app.imageSelection.selectWidget.items().reset(imageIDs);
@@ -264,7 +268,7 @@ app.createHelpers = function () {
 
 app.createConstants = function () {
   app.constants = {
-    IMAGE_COLLECTION_ID: 'LANDSAT/LC08/C01/T1_RT_TOA',
+    IMAGE_COLLECTION_ID: 'LANDSAT/LC08/C01/T1',
     VISUALIZATION_PARAMS_NATURAL: { bands: ['B4', 'B3', 'B2'], min: 0, max: 30000 },
     VISUALIZATION_PARAMS_NORMALIZED_NATURAL: { bands: ['B4', 'B3', 'B2'], min: 0, max: 30000 / 65535 },
 
@@ -305,6 +309,12 @@ app.createConstants = function () {
   app.model.getExplorationZone = function () {
     return geometry;
   };
+  app.model.getStartDate = function () {
+    return app.imageSelection.text_startDate.getValue();
+  };
+  app.model.getEndDate = function() {
+    return app.imageSelection.text_endDate.getValue();
+  };
 };
 
 app.boot = function () {
@@ -318,7 +328,7 @@ app.boot = function () {
     app.imageAreaComputation.panel,
     app.imageComparison.panel
   ]);
-
+  
   Map.setCenter(-2.74, 36.74, 9);
   ui.root.insert(0, main);
 };
