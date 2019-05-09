@@ -138,7 +138,7 @@ app.createHelpers = function () {
     },
     comunicarAreaCalculada: function (areaExtension) {
       var areaAsIntValue = parseInt(areaExtension);
-      app.imageAreaComputation.lbl_areaResult.setValue('GreenHose Area (in m2): '+areaAsIntValue);
+      app.imageAreaComputation.lbl_areaResult.setValue('GreenHose Area (in m2): ' + areaAsIntValue);
     },
     buscarImagenes: function (startDate, endDate, onFoundImagesCallback) {
       var collectionID = app.constants.IMAGE_COLLECTION_ID;
@@ -182,16 +182,16 @@ app.createHelpers = function () {
     }
   };
   app.utils.ui = {
-    enableImageComparisonWidgets: function(){
+    enableImageComparisonWidgets: function () {
       app.imageComparison.slt_imageA.setDisabled(false);
       app.imageComparison.slt_imageB.setDisabled(false);
       app.imageComparison.btn_compare.setDisabled(false);
     },
-    enableImageAreaComputationWidgets: function() {
+    enableImageAreaComputationWidgets: function () {
       app.imageAreaComputation.selectWidget.setDisabled(false);
       app.imageAreaComputation.btn_computeArea.setDisabled(false);
     },
-    enableComponentsDependentOnAddedImages: function() {
+    enableComponentsDependentOnAddedImages: function () {
       app.utils.ui.enableImageAreaComputationWidgets();
       app.utils.ui.enableImageComparisonWidgets();
     }
@@ -251,8 +251,6 @@ app.createHelpers = function () {
       invernaderosB = app.utils.detectarInvernaderos(imageB, region, rangesPerBand);
 
       app.utils.representarDiferencias(invernaderosA, invernaderosB);
-
-
     }
 
   };
@@ -289,9 +287,9 @@ app.createConstants = function () {
       BQA: { min: 2800, max: 2800 }
     };
 
-    if(normalize){
+    if (normalize) {
       var bandKey;
-      for(bandKey in rangesPerBand){
+      for (bandKey in rangesPerBand) {
         rangesPerBand[bandKey].min /= normalizationFactor;
         rangesPerBand[bandKey].max /= normalizationFactor;
       }
@@ -305,7 +303,7 @@ app.createConstants = function () {
   app.model.getStartDate = function () {
     return app.imageSelection.text_startDate.getValue();
   };
-  app.model.getEndDate = function() {
+  app.model.getEndDate = function () {
     return app.imageSelection.text_endDate.getValue();
   };
   app.model.getVisualizationParametersForImage = function (image) {
@@ -325,7 +323,7 @@ app.boot = function () {
     app.imageAreaComputation.panel,
     app.imageComparison.panel
   ]);
-  
+
   Map.setCenter(-2.74, 36.74, 9);
   ui.root.insert(0, main);
 };
