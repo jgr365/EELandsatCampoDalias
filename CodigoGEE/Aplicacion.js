@@ -1,3 +1,15 @@
+var geometry = 
+    /* color: #98ff00 */
+    /* displayProperties: [
+      {
+        "type": "rectangle"
+      }
+    ] */
+    ee.Geometry.Polygon(
+        [[[-2.7543364162988837, 36.72097430529935],
+          [-2.7543364162988837, 36.70831439827675],
+          [-2.734423696572321, 36.70831439827675],
+          [-2.734423696572321, 36.72097430529935]]], null, false);
 var app = {};
 
 app.createPanels = function () {
@@ -186,6 +198,7 @@ app.createHelpers = function () {
       var minIndex = 'min';
       var maxIndex = 'max';
       var minValue = rangesPerBand[bandID][minIndex];
+      print('minValue:', minValue);
       var maxValue = rangesPerBand[bandID][maxIndex];
       var reducer = ee.Reducer.fixedHistogram(minValue, maxValue, 1);
 
@@ -200,6 +213,7 @@ app.createHelpers = function () {
       var areaCovered;
       var pixelArea = 900;
       reduced.evaluate(function (dictionary) {
+        print(dictionary);
         var pixelsInRangePerBand = dictionary[bandID][0][1];
 
         areaCovered = pixelsInRangePerBand * pixelArea;
@@ -308,6 +322,10 @@ app.createHelpers = function () {
       var region = app.model.getExplorationZone();
       var rangesPerBand = app.model.getRangesPerBand();
 
+      print('image:', image);
+      print('region:', region);
+      print('ranges:', rangesPerBand);
+
       app.utils.calcularAreaInvernada(image, region, rangesPerBand);
     },
     compareImages: function () {
@@ -333,7 +351,7 @@ app.createHelpers = function () {
 };
 
 app.createConstants = function () {
-  var _explorationZone;
+  var _explorationZone = geometry;
 
   app.constants = {
     IMAGE_COLLECTION_ID: 'LANDSAT/LC08/C01/T1',
@@ -346,13 +364,27 @@ app.createConstants = function () {
   app.model = {};
   app.model.selectedImages = [];
   app.model.getRangesPerBand = function () {
-    var normalize = true;
+    var normalize = false;
     var normalizationFactor = 65535;
 
     var rangesPerBand = {
       B1: { min: 23212, max: 24897 },
       B2: { min: 24217, max: 26199 },
       B3: { min: 25143, max: 27502 },
+      B4: { min: 27086, max: 30323 },
+      B5: { min: 30452, max: 33739 },
+      B6: { min: 24657, max: 28171 },
+      B7: { min: 20359, max: 23632 },
+      B8: { min: 25526, max: 28830 },
+      B9: { min: 5050, max: 5091 },
+      B10: { min: 24930, max: 25389 },
+      B11: { min: 23376, max: 23781 },
+      BQA: { min: 2800, max: 2800 }
+    };
+    var rangesPerBand = {
+      B1: { min: 23212, max: 24897 },
+      B2: { min: 24217, max: 26199 },
+      B3: { min: 17225, max: 17225 },
       B4: { min: 27086, max: 30323 },
       B5: { min: 30452, max: 33739 },
       B6: { min: 24657, max: 28171 },
