@@ -26,7 +26,7 @@ app.createPanels = function () {
       placeholder: 'Find any Images first',
     }),
     btn_addImage: ui.Button({
-      label: 'Add to Image Manager',
+      label: 'Draw and Add to Image Manager',
       onClick: app.commands.addImage,
     })
   };
@@ -48,14 +48,12 @@ app.createPanels = function () {
     }),
     btn_computeArea: ui.Button('Compute', app.commands.computeArea, true),
     lbl_areaResult: ui.Label('Area:'),
-    btn_drawImage: ui.Button('Draw', app.commands.drawImage, true)
   };
   app.imageAreaComputation.panel = ui.Panel([
     app.imageAreaComputation.title,
     app.imageAreaComputation.selectWidget,
     app.imageAreaComputation.btn_computeArea,
     app.imageAreaComputation.lbl_areaResult,
-    app.imageAreaComputation.btn_drawImage
   ]);
 
   app.imageComparison = {
@@ -192,7 +190,6 @@ app.createHelpers = function () {
     enableImageAreaComputationWidgets: function() {
       app.imageAreaComputation.selectWidget.setDisabled(false);
       app.imageAreaComputation.btn_computeArea.setDisabled(false);
-      app.imageAreaComputation.btn_drawImage.setDisabled(false);
     },
     enableComponentsDependentOnAddedImages: function() {
       app.utils.ui.enableImageAreaComputationWidgets();
@@ -216,11 +213,15 @@ app.createHelpers = function () {
       var uniqueImageID = imageCollectionID + '/' + imageInCollectionID;
       var image = ee.Image(uniqueImageID);
       var selectedImages = app.model.selectedImages;
+      var visParams = app.model.getVisualizationParametersForImage(image);
+      var layerName = imageInCollectionID;
 
       print(image);
       var object = { label: label, value: image };
       print(object);
       print(object.value);
+
+      app.utils.dibujarImagen(image, visParams, layerName);
 
       //ACTUALIZAR LOS UI.WIDGETS QUE DEPENDEN DE LAS IMAGENES SELECCIONADAS
       selectedImages.push(object);
@@ -236,14 +237,6 @@ app.createHelpers = function () {
       var rangesPerBand = app.model.getRangesPerBand();
 
       app.utils.calcularAreaInvernada(image, region, rangesPerBand);
-    },
-    drawImage: function () {
-      var image = app.imageAreaComputation.selectWidget.getValue();
-      var visParams = app.constants.VISUALIZATION_PARAMS_NORMALIZED_NATURAL;
-      var layerName = image.get('system:index');
-      layerName = layerName.getInfo();
-
-      app.utils.dibujarImagen(image, visParams, layerName);
     },
     compareImages: function () {
       var imageA = app.imageComparison.slt_imageA.getValue();
@@ -315,6 +308,10 @@ app.createConstants = function () {
   app.model.getEndDate = function() {
     return app.imageSelection.text_endDate.getValue();
   };
+  app.model.getVisualizationParametersForImage = function (image) {
+    //TODO: parametize with image
+    return app.constants.VISUALIZATION_PARAMS_NATURAL;
+  }
 };
 
 app.boot = function () {
