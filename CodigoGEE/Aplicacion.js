@@ -41,6 +41,7 @@ app.createPanels = function () {
 
   app.imageAreaComputation = {
     title: ui.Label('2) Image Manager'),
+    chk_drawArea: ui.Checkbox('Draw Area'),
     selectWidget: ui.Select({
       items: app.model.selectedImages,
       placeholder: 'Find and Add any image first',
@@ -51,6 +52,7 @@ app.createPanels = function () {
   };
   app.imageAreaComputation.panel = ui.Panel([
     app.imageAreaComputation.title,
+    app.imageAreaComputation.chk_drawArea,
     app.imageAreaComputation.selectWidget,
     app.imageAreaComputation.btn_computeArea,
     app.imageAreaComputation.lbl_areaResult,
@@ -81,6 +83,76 @@ app.createPanels = function () {
 
 app.createHelpers = function () {
   app.utils = {
+    DrawAreaTool: function (map) {
+      this.map = map;
+      this.layer = ui.Map.Layer({ name: 'area selection tool', visParams: { color: 'yellow' } });
+      this.selection = null;
+      this.active = false;
+      this.points = [];
+      this.area = null;
+
+      this.listeners = [];
+
+      var tool = this;
+
+      this.initialize = function () {
+        this.map.onClick(this.onMouseClick);
+        this.map.layers().add(this.layer);
+      };
+
+      this.startDrawing = function () {
+        this.active = true;
+        this.points = [];
+
+        this.map.style().set('cursor', 'crosshair');
+        this.layer.setShown(true);
+      };
+
+      this.stopDrawing = function () {
+        tool.active = false;
+        tool.map.style().set('cursor', 'hand');
+
+        if (tool.points.length < 2) {
+          return;
+        }
+
+        tool.area = ee.Geometry.Polygon(tool.points);
+        tool.layer.setEeObject(tool.area);
+
+        tool.listeners.map(function (listener) {
+          listener(tool.area);
+        });
+      };
+
+      /***
+      * Mouse click event handler
+      */
+      this.onMouseClick = function (coords) {
+        if (!tool.active) {
+          return;
+        }
+
+        tool.points.push([coords.lon, coords.lat]);
+
+        var geom = tool.points.length > 1 ? ee.Geometry.LineString(tool.points) : ee.Geometry.Point(tool.points[0]);
+        tool.layer.setEeObject(geom);
+
+        var l = ee.Geometry.LineString([tool.points[0], tool.points[tool.points.length - 1]]).length(1).getInfo();
+
+        if (tool.points.length > 1 && l / Map.getScale() < 5) {
+          tool.stopDrawing();
+        }
+      };
+
+      /***
+      * Adds a new event handler, fired on feature selection. 
+      */
+      this.onFinished = function (listener) {
+        tool.listeners.push(listener);
+      };
+
+      this.initialize();
+    },
     dibujarImagen: function (image, visParams, layerName) {
       Map.addLayer(image, visParams, layerName);
     },
@@ -251,6 +323,9 @@ app.createHelpers = function () {
       invernaderosB = app.utils.detectarInvernaderos(imageB, region, rangesPerBand);
 
       app.utils.representarDiferencias(invernaderosA, invernaderosB);
+    },
+    toggleDrawAreaTool: function (activated) {
+
     }
 
   };
@@ -258,6 +333,8 @@ app.createHelpers = function () {
 };
 
 app.createConstants = function () {
+  var _explorationZone;
+
   app.constants = {
     IMAGE_COLLECTION_ID: 'LANDSAT/LC08/C01/T1',
     VISUALIZATION_PARAMS_NATURAL: { bands: ['B4', 'B3', 'B2'], min: 0, max: 30000 },
@@ -298,7 +375,10 @@ app.createConstants = function () {
     return rangesPerBand;
   };
   app.model.getExplorationZone = function () {
-    return geometry;
+    return _explorationZone;
+  };
+  app.model.setExplorationZone = function (geometry) {
+    _explorationZone = geometry;
   };
   app.model.getStartDate = function () {
     return app.imageSelection.text_startDate.getValue();
@@ -309,13 +389,33 @@ app.createConstants = function () {
   app.model.getVisualizationParametersForImage = function (image) {
     //TODO: parametize with image
     return app.constants.VISUALIZATION_PARAMS_NATURAL;
-  }
+  };
+};
+
+app.bootDrawAreaTool = function () {
+  var tool = new app.utils.DrawAreaTool(Map);
+
+  tool.onFinished(function (geometry) {
+    app.imageAreaComputation.chk_drawArea.setValue(false, false);
+    app.model.setExplorationZone(geometry);
+    print(geometry);
+  });
+
+  app.imageAreaComputation.chk_drawArea.onChange(function(active) {
+    if(active) {
+      tool.startDrawing();
+    } else {
+      tool.stopDrawing();
+    }
+  });
 };
 
 app.boot = function () {
   app.createConstants();
   app.createHelpers();
   app.createPanels();
+
+  app.bootDrawAreaTool();
 
   var main = ui.Panel([
     app.intro.panel,
