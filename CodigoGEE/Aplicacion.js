@@ -212,7 +212,7 @@ app.createHelpers = function () {
 
 
       var areaCovered;
-      var pixelArea = 900;
+      var pixelArea = 900.0;
       reduced.evaluate(function (dictionary) {
 
         var pixelsInRangePerBand;
@@ -222,15 +222,19 @@ app.createHelpers = function () {
           pixelsInRangePerBand = dictionary[bandID][0][1];
         }
 
-        areaCovered = pixelsInRangePerBand * pixelArea;
+        var areaCoveredInMeters = pixelsInRangePerBand * pixelArea;
+        var areaCoveredInHectares = areaCoveredInMeters / 10000.0;
+        areaCovered = areaCoveredInHectares;
+
         app.utils.comunicarAreaCalculada(areaCovered);
 
       });
 
     },
     comunicarAreaCalculada: function (areaExtension) {
-      var areaAsIntValue = parseInt(areaExtension);
-      app.imageAreaComputation.lbl_areaResult.setValue('GreenHose Area (in m2): ' + areaAsIntValue);
+      // var areaAsIntValue = parseInt(areaExtension);
+      areaExtension = areaExtension.toFixed(2);
+      app.imageAreaComputation.lbl_areaResult.setValue('GreenHose Area (in ha): ' + areaExtension);
     },
     buscarImagenes: function (startDate, endDate, onFoundImagesCallback) {
       var collectionID = app.constants.IMAGE_COLLECTION_ID;
@@ -239,6 +243,7 @@ app.createHelpers = function () {
       var filteredCollection = collection
         .filterBounds(Map.getCenter())
         .filterDate(startDate, endDate)
+        .sort('CLOUD_COVER')
         .limit(10)
         ;
 
