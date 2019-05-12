@@ -16,6 +16,65 @@ app.createPanels = function () {
     style: { width: '300px' }
   });
 
+  app.bandsSelection = {
+    chk_B1: ui.Checkbox({
+      label: 'B1',
+      onChange: app.commands.toggleB1
+    }),
+    chk_B2: ui.Checkbox({
+      label: 'B2',
+      onChange: app.commands.toggleB2
+    }),
+    chk_B3: ui.Checkbox({
+      label: 'B3',
+      onChange: app.commands.toggleB3
+    }),
+    chk_B4: ui.Checkbox({
+      label: 'B4',
+      onChange: app.commands.toggleB4
+    }),
+    chk_B5: ui.Checkbox({
+      label: 'B5',
+      onChange: app.commands.toggleB5
+    }),
+    chk_B6: ui.Checkbox({
+      label: 'B6',
+      onChange: app.commands.toggleB6
+    }),
+    chk_B7: ui.Checkbox({
+      label: 'B7',
+      onChange: app.commands.toggleB7
+    }),
+    chk_B8: ui.Checkbox({
+      label: 'B8',
+      onChange: app.commands.toggleB8
+    }),
+    chk_B9: ui.Checkbox({
+      label: 'B9',
+      onChange: app.commands.toggleB9
+    }),
+    chk_B10: ui.Checkbox({
+      label: 'B10',
+      onChange: app.commands.toggleB10
+    }),
+    chk_B11: ui.Checkbox({
+      label: 'B11',
+      onChange: app.commands.toggleB11
+    })
+  };
+  app.bandsSelection.panel = ui.Panel([
+    app.bandsSelection.chk_B1,
+    app.bandsSelection.chk_B2,
+    app.bandsSelection.chk_B3,
+    app.bandsSelection.chk_B4,
+    app.bandsSelection.chk_B6,
+    app.bandsSelection.chk_B7,
+    app.bandsSelection.chk_B8,
+    app.bandsSelection.chk_B9,
+    app.bandsSelection.chk_B10,
+    app.bandsSelection.chk_B11,
+  ]);
+
   app.imageSelection = {
     title: ui.Label('1) Find Near Images'),
     btn_findImages: ui.Button('Find Images', app.commands.findImages),
@@ -91,20 +150,56 @@ app.createHelpers = function () {
 
       print('Segunda oportunidad, en detectarInvernaderos', rangesPerBand);
 
-      var bandsToUseForIdentification = [
-        // 'B1',
-        // 'B2', 
-        'B3',
-        'B4',
-        'B5',
-        // 'B6', 
-        // 'B7', 
-        // 'B8', 
-        // 'B9', 
-        // 'B10', 
-        // 'B11', 
-        // 'BQA'
-      ];
+      // var bandsToUseForIdentification = [
+      //   // 'B1',
+      //   // 'B2', 
+      //   'B3',
+      //   'B4',
+      //   'B5',
+      //   // 'B6', 
+      //   // 'B7', 
+      //   // 'B8', 
+      //   // 'B9', 
+      //   // 'B10', 
+      //   // 'B11', 
+      //   // 'BQA'
+      // ];
+      
+      var bandsToUseForIdentification = [];
+      if(app.model.useL8B1){
+        bandsToUseForIdentification.push('B1');
+      }
+      if(app.model.useL8B2){
+        bandsToUseForIdentification.push('B2');
+      }
+      if(app.model.useL8B3){
+        bandsToUseForIdentification.push('B3');
+      }
+      if(app.model.useL8B4){
+        bandsToUseForIdentification.push('B4');
+      }
+      if(app.model.useL8B5){
+        bandsToUseForIdentification.push('B5');
+      }
+      if(app.model.useL8B6){
+        bandsToUseForIdentification.push('B6');
+      }
+      if(app.model.useL8B7){
+        bandsToUseForIdentification.push('B7');
+      }
+      if(app.model.useL8B8){
+        bandsToUseForIdentification.push('B8');
+      }
+      if(app.model.useL8B9){
+        bandsToUseForIdentification.push('B9');
+      }
+      if(app.model.useL8B10){
+        bandsToUseForIdentification.push('B10');
+      }
+      if(app.model.useL8B11){
+        bandsToUseForIdentification.push('B11');
+      }
+
 
       InvernaderosImage = app.utils.detectarInvernaderosUsandoLasBandas(image, region, bandsToUseForIdentification, rangesPerBand);
       return InvernaderosImage;
@@ -308,6 +403,39 @@ app.createHelpers = function () {
       app.utils.representarDiferencias(invernaderosA, invernaderosB);
 
 
+    },
+    toggleB1: function () {
+      var newValue = app.model.useL8B1 = app.bandsSelection.chk_B1.getValue();
+    },
+    toggleB2: function () {
+      var newValue = app.model.useL8B2 = app.bandsSelection.chk_B2.getValue();
+    },
+    toggleB3: function () {
+      var newValue = app.model.useL8B3 = app.bandsSelection.chk_B3.getValue();
+    },
+    toggleB4: function () {
+      var newValue = app.model.useL8B4 = app.bandsSelection.chk_B4.getValue();
+    },
+    toggleB5: function () {
+      var newValue = app.model.useL8B5 = app.bandsSelection.chk_B5.getValue();
+    },
+    toggleB6: function () {
+      var newValue = app.model.useL8B6 = app.bandsSelection.chk_B6.getValue();
+    },
+    toggleB7: function () {
+      var newValue = app.model.useL8B7 = app.bandsSelection.chk_B7.getValue();
+    },
+    toggleB8: function () {
+      var newValue = app.model.useL8B8 = app.bandsSelection.chk_B8.getValue();
+    },
+    toggleB9: function () {
+      var newValue = app.model.useL8B9 = app.bandsSelection.chk_B9.getValue();
+    },
+    toggleB100: function () {
+      var newValue = app.model.useL8B10 = app.bandsSelection.chk_B10.getValue();
+    },
+    toggleB11: function () {
+      var newValue = app.model.useL8B11 = app.bandsSelection.chk_B11.getValue();
     }
 
   };
@@ -323,7 +451,19 @@ app.createConstants = function () {
     DEBUG_VISUALIZATION_PARAMS_BAND_3: { bands: ['B3'], min: 0, max: 30000 }
   };
 
-  app.model = {};
+  app.model = {
+    useL8B1: false,
+    useL8B2: false,
+    useL8B3: false,
+    useL8B4: false,
+    useL8B5: false,
+    useL8B6: false,
+    useL8B7: false,
+    useL8B8: false,
+    useL8B9: false,
+    useL8B10: false,
+    useL8B11: false,
+  };
   app.model.selectedImages = [];
   app.model.getRangesPerBand = function () {
     var normalize = true;
@@ -366,9 +506,11 @@ app.boot = function () {
 
   var main = ui.Panel([
     app.intro.panel,
+    app.bandsSelection.panel,
     app.imageSelection.panel,
     app.imageAreaComputation.panel,
     app.imageComparison.panel
+    
   ]);
 
   Map.setCenter(-2.74, 36.74, 9);
