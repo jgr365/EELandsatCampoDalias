@@ -16,6 +16,65 @@ app.createPanels = function () {
     style: { width: '300px' }
   });
 
+  app.bandsSelection = {
+    chk_B1: ui.Checkbox({
+      label: 'B1',
+      onChange: app.commands.toggleB1
+    }),
+    chk_B2: ui.Checkbox({
+      label: 'B2',
+      onChange: app.commands.toggleB2
+    }),
+    chk_B3: ui.Checkbox({
+      label: 'B3',
+      onChange: app.commands.toggleB3
+    }),
+    chk_B4: ui.Checkbox({
+      label: 'B4',
+      onChange: app.commands.toggleB4
+    }),
+    chk_B5: ui.Checkbox({
+      label: 'B5',
+      onChange: app.commands.toggleB5
+    }),
+    chk_B6: ui.Checkbox({
+      label: 'B6',
+      onChange: app.commands.toggleB6
+    }),
+    chk_B7: ui.Checkbox({
+      label: 'B7',
+      onChange: app.commands.toggleB7
+    }),
+    chk_B8: ui.Checkbox({
+      label: 'B8',
+      onChange: app.commands.toggleB8
+    }),
+    chk_B9: ui.Checkbox({
+      label: 'B9',
+      onChange: app.commands.toggleB9
+    }),
+    chk_B10: ui.Checkbox({
+      label: 'B10',
+      onChange: app.commands.toggleB10
+    }),
+    chk_B11: ui.Checkbox({
+      label: 'B11',
+      onChange: app.commands.toggleB11
+    })
+  };
+  app.bandsSelection.panel = ui.Panel([
+    app.bandsSelection.chk_B1,
+    app.bandsSelection.chk_B2,
+    app.bandsSelection.chk_B3,
+    app.bandsSelection.chk_B4,
+    app.bandsSelection.chk_B6,
+    app.bandsSelection.chk_B7,
+    app.bandsSelection.chk_B8,
+    app.bandsSelection.chk_B9,
+    app.bandsSelection.chk_B10,
+    app.bandsSelection.chk_B11,
+  ]);
+
   app.imageSelection = {
     title: ui.Label('1) Find Near Images'),
     text_startDate: ui.Textbox('YYYY-MM-DD', '2016-01-01'),
@@ -163,7 +222,60 @@ app.createHelpers = function () {
       var B3max = rangesPerBand['B3'][maxIndex];
       var InvernaderosImage;
 
-      InvernaderosImage = app.utils.detectarInvernaderosUsandoLaBanda3(image, region, B3min, B3max);
+      print('Segunda oportunidad, en detectarInvernaderos', rangesPerBand);
+
+      // var bandsToUseForIdentification = [
+      //   // 'B1',
+      //   // 'B2', 
+      //   'B3',
+      //   'B4',
+      //   'B5',
+      //   // 'B6', 
+      //   // 'B7', 
+      //   // 'B8', 
+      //   // 'B9', 
+      //   // 'B10', 
+      //   // 'B11', 
+      //   // 'BQA'
+      // ];
+      
+      var bandsToUseForIdentification = [];
+      if(app.model.useL8B1){
+        bandsToUseForIdentification.push('B1');
+      }
+      if(app.model.useL8B2){
+        bandsToUseForIdentification.push('B2');
+      }
+      if(app.model.useL8B3){
+        bandsToUseForIdentification.push('B3');
+      }
+      if(app.model.useL8B4){
+        bandsToUseForIdentification.push('B4');
+      }
+      if(app.model.useL8B5){
+        bandsToUseForIdentification.push('B5');
+      }
+      if(app.model.useL8B6){
+        bandsToUseForIdentification.push('B6');
+      }
+      if(app.model.useL8B7){
+        bandsToUseForIdentification.push('B7');
+      }
+      if(app.model.useL8B8){
+        bandsToUseForIdentification.push('B8');
+      }
+      if(app.model.useL8B9){
+        bandsToUseForIdentification.push('B9');
+      }
+      if(app.model.useL8B10){
+        bandsToUseForIdentification.push('B10');
+      }
+      if(app.model.useL8B11){
+        bandsToUseForIdentification.push('B11');
+      }
+
+
+      InvernaderosImage = app.utils.detectarInvernaderosUsandoLasBandas(image, region, bandsToUseForIdentification, rangesPerBand);
       return InvernaderosImage;
     },
     detectarInvernaderosUsandoLaBanda3: function (image, region, min, max) {
@@ -174,6 +286,38 @@ app.createHelpers = function () {
       var unionThresholdImage;
 
       image = image.select(bandID);
+      minimunThresholdImage = image.gt(min);
+      maximunThresholdImage = image.lt(max);
+      unionThresholdImage = minimunThresholdImage.and(maximunThresholdImage);
+
+      return unionThresholdImage;
+    },
+    detectarInvernaderosUsandoLasBandas: function (image, region, bandNames, rangesPerBand) {
+      var invernaderosMask;
+
+      var bandaDeInvernaderosMask;
+      var index;
+      for (index in bandNames) {
+        print('bandName:', index);
+        bandaDeInvernaderosMask = app.utils.detectarInvernaderosUsandoLaBanda(image, region, bandNames[index], rangesPerBand);
+        if (!invernaderosMask) {
+          invernaderosMask = bandaDeInvernaderosMask;
+        } else {
+          invernaderosMask = invernaderosMask.and(bandaDeInvernaderosMask);
+        }
+      }
+
+      return invernaderosMask;
+    },
+    detectarInvernaderosUsandoLaBanda: function (image, region, bandKey, rangesPerBand) {
+      var min = rangesPerBand[bandKey].min;
+      var max = rangesPerBand[bandKey].max;
+      var minimunThresholdImage;
+      var maximunThresholdImage;
+      var unionThresholdImage;
+
+
+      image = image.select(bandKey);
       minimunThresholdImage = image.gt(min);
       maximunThresholdImage = image.lt(max);
       unionThresholdImage = minimunThresholdImage.and(maximunThresholdImage);
@@ -313,8 +457,11 @@ app.createHelpers = function () {
     compareImages: function () {
       var imageA = app.imageComparison.slt_imageA.getValue();
       var imageB = app.imageComparison.slt_imageB.getValue();
-      var region = app.model.getExplorationZone();
+      // var region = app.model.getExplorationZone();
+      var region;
       var rangesPerBand = app.model.getRangesPerBand();
+
+      print(rangesPerBand);
 
       var invernaderosA;
       var invernaderosB;
@@ -326,6 +473,39 @@ app.createHelpers = function () {
     },
     toggleDrawAreaTool: function (activated) {
 
+    },
+    toggleB1: function () {
+      var newValue = app.model.useL8B1 = app.bandsSelection.chk_B1.getValue();
+    },
+    toggleB2: function () {
+      var newValue = app.model.useL8B2 = app.bandsSelection.chk_B2.getValue();
+    },
+    toggleB3: function () {
+      var newValue = app.model.useL8B3 = app.bandsSelection.chk_B3.getValue();
+    },
+    toggleB4: function () {
+      var newValue = app.model.useL8B4 = app.bandsSelection.chk_B4.getValue();
+    },
+    toggleB5: function () {
+      var newValue = app.model.useL8B5 = app.bandsSelection.chk_B5.getValue();
+    },
+    toggleB6: function () {
+      var newValue = app.model.useL8B6 = app.bandsSelection.chk_B6.getValue();
+    },
+    toggleB7: function () {
+      var newValue = app.model.useL8B7 = app.bandsSelection.chk_B7.getValue();
+    },
+    toggleB8: function () {
+      var newValue = app.model.useL8B8 = app.bandsSelection.chk_B8.getValue();
+    },
+    toggleB9: function () {
+      var newValue = app.model.useL8B9 = app.bandsSelection.chk_B9.getValue();
+    },
+    toggleB100: function () {
+      var newValue = app.model.useL8B10 = app.bandsSelection.chk_B10.getValue();
+    },
+    toggleB11: function () {
+      var newValue = app.model.useL8B11 = app.bandsSelection.chk_B11.getValue();
     }
 
   };
@@ -343,7 +523,19 @@ app.createConstants = function () {
     DEBUG_VISUALIZATION_PARAMS_BAND_3: { bands: ['B3'], min: 0, max: 30000 }
   };
 
-  app.model = {};
+  app.model = {
+    useL8B1: false,
+    useL8B2: false,
+    useL8B3: false,
+    useL8B4: false,
+    useL8B5: false,
+    useL8B6: false,
+    useL8B7: false,
+    useL8B8: false,
+    useL8B9: false,
+    useL8B10: false,
+    useL8B11: false,
+  };
   app.model.selectedImages = [];
   app.model.getRangesPerBand = function () {
     var normalize = true;
@@ -419,9 +611,11 @@ app.boot = function () {
 
   var main = ui.Panel([
     app.intro.panel,
+    app.bandsSelection.panel,
     app.imageSelection.panel,
     app.imageAreaComputation.panel,
     app.imageComparison.panel
+    
   ]);
 
   Map.setCenter(-2.74, 36.74, 9);
