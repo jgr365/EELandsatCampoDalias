@@ -1,15 +1,15 @@
-var geometry = 
-    /* color: #98ff00 */
-    /* displayProperties: [
-      {
-        "type": "rectangle"
-      }
-    ] */
-    ee.Geometry.Polygon(
-        [[[-2.7543364162988837, 36.72097430529935],
-          [-2.7543364162988837, 36.70831439827675],
-          [-2.734423696572321, 36.70831439827675],
-          [-2.734423696572321, 36.72097430529935]]], null, false);
+var geometry =
+  /* color: #98ff00 */
+  /* displayProperties: [
+    {
+      "type": "rectangle"
+    }
+  ] */
+  ee.Geometry.Polygon(
+    [[[-2.7543364162988837, 36.72097430529935],
+    [-2.7543364162988837, 36.70831439827675],
+    [-2.734423696572321, 36.70831439827675],
+    [-2.734423696572321, 36.72097430529935]]], null, false);
 var app = {};
 
 app.createPanels = function () {
@@ -250,39 +250,39 @@ app.createHelpers = function () {
       //   // 'B11', 
       //   // 'BQA'
       // ];
-      
+
       var bandsToUseForIdentification = [];
-      if(app.model.useL8B1){
+      if (app.model.useL8B1) {
         bandsToUseForIdentification.push('B1');
       }
-      if(app.model.useL8B2){
+      if (app.model.useL8B2) {
         bandsToUseForIdentification.push('B2');
       }
-      if(app.model.useL8B3){
+      if (app.model.useL8B3) {
         bandsToUseForIdentification.push('B3');
       }
-      if(app.model.useL8B4){
+      if (app.model.useL8B4) {
         bandsToUseForIdentification.push('B4');
       }
-      if(app.model.useL8B5){
+      if (app.model.useL8B5) {
         bandsToUseForIdentification.push('B5');
       }
-      if(app.model.useL8B6){
+      if (app.model.useL8B6) {
         bandsToUseForIdentification.push('B6');
       }
-      if(app.model.useL8B7){
+      if (app.model.useL8B7) {
         bandsToUseForIdentification.push('B7');
       }
-      if(app.model.useL8B8){
+      if (app.model.useL8B8) {
         bandsToUseForIdentification.push('B8');
       }
-      if(app.model.useL8B9){
+      if (app.model.useL8B9) {
         bandsToUseForIdentification.push('B9');
       }
-      if(app.model.useL8B10){
+      if (app.model.useL8B10) {
         bandsToUseForIdentification.push('B10');
       }
-      if(app.model.useL8B11){
+      if (app.model.useL8B11) {
         bandsToUseForIdentification.push('B11');
       }
 
@@ -360,7 +360,7 @@ app.createHelpers = function () {
       reduced.evaluate(function (dictionary) {
 
         var pixelsInRangePerBand;
-        if(dictionary[bandID] === null){
+        if (dictionary[bandID] === null) {
           pixelsInRangePerBand = 0;
         } else {
           pixelsInRangePerBand = dictionary[bandID][0][1];
@@ -381,23 +381,42 @@ app.createHelpers = function () {
       app.imageAreaComputation.lbl_areaResult.setValue('GreenHose Area (in ha): ' + areaExtension);
     },
     buscarImagenes: function (startDate, endDate, onFoundImagesCallback) {
-      var collectionID = app.constants.IMAGE_COLLECTION_ID;
-      var collection = ee.ImageCollection(collectionID);
+      //LANDSAT 5: MAR-84 -> JAN-2013
+      //LANDSAT 8: FEB-13 -> NOW
 
-      var filteredCollection = collection
-        .filterBounds(Map.getCenter())
-        .filterDate(startDate, endDate)
-        .sort('CLOUD_COVER')
-        .limit(10)
-        ;
+      var imageCollection = ee.ImageCollection([]);
+      if (startDate < '2013-02-01') {
+        //include L5 collection
+        var collectionL5 = app.utils.buscarImagenesPorColeccion(startDate, endDate, app.constants.LANDSAT5_TOA_COLLECTION_ID)
+        imageCollection = imageCollection.merge(collectionL5);
+      }
+      if (endDate > '2013-01-31') {
+        //include L8 collection
+        var collectionL8 = app.utils.buscarImagenesPorColeccion(startDate, endDate, app.constants.LANDSAT8_TOA_COLLECTION_ID)
+        imageCollection = imageCollection.merge(collectionL8);
+      }
 
-      var imageIDs = filteredCollection.reduceColumns(ee.Reducer.toList(), ['system:index'])
+      imageCollection = imageCollection.sort('CLOUD_COVER').limit(app.constants.MAX_IMAGES_FOUND);
+
+      var imageIDs = imageCollection.reduceColumns(ee.Reducer.toList(), ['system:index'])
         .get('list');
 
       imageIDs.evaluate(function (ids) {
         //TODO: cómo renovar las nuevas que se busquen
         onFoundImagesCallback(ids);
       });
+    },
+    buscarImagenesPorColeccion: function (startDate, endDate, collectionID) {
+      var collection = ee.ImageCollection(collectionID);
+
+      var filteredCollection = collection
+        .filterBounds(Map.getCenter())
+        .filterDate(startDate, endDate)
+        .sort('CLOUD_COVER')
+        .limit(app.constants.MAX_IMAGES_FOUND)
+        ;
+
+      return filteredCollection;
     },
     representarDiferencias: function (invernaderosA, invernaderosB) {
       var normalizationFactor = 65535;
@@ -476,7 +495,7 @@ app.createHelpers = function () {
       var rangesPerBand = app.model.getRangesPerBand();
 
 
-      var invernaderos = app.utils.detectarInvernaderos(image,region,rangesPerBand);
+      var invernaderos = app.utils.detectarInvernaderos(image, region, rangesPerBand);
       invernaderos = invernaderos.clip(region);
 
       app.utils.dibujarImagen(invernaderos, {}, 'invernaderos localizados');
@@ -546,6 +565,10 @@ app.createConstants = function () {
   var _explorationZone = geometry;
 
   app.constants = {
+    MAX_IMAGES_FOUND: 10,
+    LANDSAT5_TOA_COLLECTION_ID: 'LANDSAT/LT05/C01/T1_TOA',
+    LANDSAT8_TOA_COLLECTION_ID: 'LANDSAT/LC08/C01/T1_RT_TOA',
+    LANDSAT8_SR_COLLECTION_ID: 'LANDSAT/LC08/C01/T1',
     IMAGE_COLLECTION_ID: 'LANDSAT/LC08/C01/T1_RT_TOA',
     VISUALIZATION_PARAMS_NATURAL: { bands: ['B4', 'B3', 'B2'], min: 0, max: 30000 },
     VISUALIZATION_PARAMS_NORMALIZED_NATURAL: { bands: ['B4', 'B3', 'B2'], min: 0, max: 30000 / 65535 },
@@ -675,11 +698,10 @@ app.createConstants = function () {
   app.model.getVisualizationParametersForImage = function (image) {
     //TODO: parametize with image
     var visParams;
-    var LANDSAT8_TOA_COLLECTION_ID = 'LANDSAT/LC08/C01/T1_RT_TOA';
-    var LANDSAT8_SR_COLLECTION_ID = 'LANDSAT/LC08/C01/T1';
-    if( app.constants.IMAGE_COLLECTION_ID = LANDSAT8_TOA_COLLECTION_ID){
+
+    if (app.constants.IMAGE_COLLECTION_ID = app.constants.LANDSAT8_TOA_COLLECTION_ID) {
       visParams = app.constants.VISUALIZATION_PARAMS_NORMALIZED_NATURAL;
-    } else if(app.constants.IMAGE_COLLECTION_ID = LANDSAT8_SR_COLLECTION_ID){
+    } else if (app.constants.IMAGE_COLLECTION_ID = app.constants.LANDSAT8_SR_COLLECTION_ID) {
       visParams = app.constants.VISUALIZATION_PARAMS_NATURAL;
     }
     return visParams;
@@ -694,8 +716,8 @@ app.bootDrawAreaTool = function () {
     app.model.setExplorationZone(geometry);
   });
 
-  app.imageAreaComputation.chk_drawArea.onChange(function(active) {
-    if(active) {
+  app.imageAreaComputation.chk_drawArea.onChange(function (active) {
+    if (active) {
       tool.startDrawing();
     } else {
       tool.stopDrawing();
@@ -716,7 +738,7 @@ app.boot = function () {
     app.imageSelection.panel,
     app.imageAreaComputation.panel,
     app.imageComparison.panel
-    
+
   ]);
 
   Map.setCenter(-2.74, 36.74, 9);
