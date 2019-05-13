@@ -440,6 +440,20 @@ app.createHelpers = function () {
 
       Map.addLayer(invernaderosAsinBMasked, visParamsIncrementoA, 'Invernaderos A excluyentes');
       Map.addLayer(invernaderosBsinAMasked, visParamsIncrementoB, 'Invernaderos B excluyentes');
+    },
+    perteneceL8: function (image) {
+      var regexp = RegExp('LC08');
+
+      if (typeof image === 'string' || image instanceof String) {
+        return regexp.test(image);
+      } else {
+        //DEBERÍA SER UNA ee.Image
+        var imageID = image.get('system:index');
+        return regexp.test(imageID);
+      }
+    },
+    perteneceL5: function (image) {
+      return !app.utils.perteneceL8(image);
     }
   };
   app.utils.ui = {
@@ -464,15 +478,15 @@ app.createHelpers = function () {
       var endDate = app.model.getEndDate();
 
       app.utils.buscarImagenes(startDate, endDate, function (imageIDs) {
-        imageIDs = imageIDs.map(function(currentValue, i, array){
+        imageIDs = imageIDs.map(function (currentValue, i, array) {
           return currentValue.match('(LT05|LC08)_[0-9]+_[0-9]+')[0]; //Porque obtiene dos: Ejemplo: ["LC08_200035_20181012","LC08"]
         });
         app.imageSelection.selectWidget.items().reset(imageIDs);
       });
     },
     addImage: function () {
-      var imageCollectionID = app.constants.IMAGE_COLLECTION_ID;
       var imageInCollectionID = app.imageSelection.selectWidget.getValue();
+      var imageCollectionID = app.model.getImageCollectionFor(imageInCollectionID);
       var label = imageInCollectionID;
       var uniqueImageID = imageCollectionID + '/' + imageInCollectionID;
       var image = ee.Image(uniqueImageID);
@@ -573,8 +587,9 @@ app.createConstants = function () {
     LANDSAT8_TOA_COLLECTION_ID: 'LANDSAT/LC08/C01/T1_RT_TOA',
     LANDSAT8_SR_COLLECTION_ID: 'LANDSAT/LC08/C01/T1',
     IMAGE_COLLECTION_ID: 'LANDSAT/LC08/C01/T1_RT_TOA',
-    VISUALIZATION_PARAMS_NATURAL: { bands: ['B4', 'B3', 'B2'], min: 0, max: 30000 },
-    VISUALIZATION_PARAMS_NORMALIZED_NATURAL: { bands: ['B4', 'B3', 'B2'], min: 0, max: 30000 / 65535 },
+    VISUALIZATION_PARAMS_L8_NATURAL: { bands: ['B4', 'B3', 'B2'], min: 0, max: 30000 },
+    VISUALIZATION_PARAMS_L8_NORMALIZED_NATURAL: { bands: ['B4', 'B3', 'B2'], min: 0, max: 30000 / 65535 },
+    VISUALIZATION_PARAMS_L5_NORMALIZED_NATURAL: { bands: ['B3', 'B2', 'B1'], min: 0, max: 30000 / 65535 },
 
     DEBUG_VISUALIZATION_PARAMS_BAND_3: { bands: ['B3'], min: 0, max: 30000 }
   };
@@ -702,13 +717,25 @@ app.createConstants = function () {
     //TODO: parametize with image
     var visParams;
 
+    if(app.utils.perteneceL8(image)){
+      return app.constants.VISUALIZATION_PARAMS_L8_NORMALIZED_NATURAL;
+    } else if (app.utils.perteneceL5(image)){
+      return app.constants.VISUALIZATION_PARAMS_L5_NORMALIZED_NATURAL
+    }
     if (app.constants.IMAGE_COLLECTION_ID = app.constants.LANDSAT8_TOA_COLLECTION_ID) {
-      visParams = app.constants.VISUALIZATION_PARAMS_NORMALIZED_NATURAL;
+      visParams = app.constants.VISUALIZATION_PARAMS_L8_NORMALIZED_NATURAL;
     } else if (app.constants.IMAGE_COLLECTION_ID = app.constants.LANDSAT8_SR_COLLECTION_ID) {
-      visParams = app.constants.VISUALIZATION_PARAMS_NATURAL;
+      visParams = app.constants.VISUALIZATION_PARAMS_L8_NATURAL;
     }
     return visParams;
   };
+  app.model.getImageCollectionFor = function (image) {
+    if (app.utils.perteneceL8(image)) {
+      return app.constants.LANDSAT8_TOA_COLLECTION_ID;
+    } else if (app.utils.perteneceL5(image)) {
+      return app.constants.LANDSAT5_TOA_COLLECTION_ID;
+    }
+  }
 };
 
 app.bootDrawAreaTool = function () {
