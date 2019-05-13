@@ -464,6 +464,9 @@ app.createHelpers = function () {
       var endDate = app.model.getEndDate();
 
       app.utils.buscarImagenes(startDate, endDate, function (imageIDs) {
+        imageIDs = imageIDs.map(function(currentValue, i, array){
+          return currentValue.match('(LT05|LC08)_[0-9]+_[0-9]+')[0]; //Porque obtiene dos: Ejemplo: ["LC08_200035_20181012","LC08"]
+        });
         app.imageSelection.selectWidget.items().reset(imageIDs);
       });
     },
