@@ -92,6 +92,7 @@ app.createPanels = function () {
     text_startDate: ui.Textbox('YYYY-MM-DD', '2018-01-01'),
     text_endDate: ui.Textbox('YYYY-MM-DD', '2018-12-31'),
     btn_findImages: ui.Button('Find Images', app.commands.findImages),
+    lbl_findImage: ui.Label('Showing - of - images found'),
     selectWidget: ui.Select({
       items: [],
       placeholder: 'Find any Images first',
@@ -106,6 +107,7 @@ app.createPanels = function () {
     app.imageSelection.text_startDate,
     app.imageSelection.text_endDate,
     app.imageSelection.btn_findImages,
+    app.imageSelection.lbl_findImage,
     app.imageSelection.selectWidget,
     app.imageSelection.btn_addImage
   ]);
@@ -385,15 +387,24 @@ app.createHelpers = function () {
       //LANDSAT 8: FEB-13 -> NOW
 
       var imageCollection = ee.ImageCollection([]);
+      var imagesTotal = 0;
       if (startDate < '2013-02-01') {
         //include L5 collection
         var collectionL5 = app.utils.buscarImagenesPorColeccion(startDate, endDate, app.constants.LANDSAT5_TOA_COLLECTION_ID)
+        var collectionL5Size = collectionL5.size();
+
+        collectionL5 = collectionL5.limit(app.constants.MAX_IMAGES_FOUND);
+        imagesTotal = collectionL5Size.add(imagesTotal);
         imageCollection = imageCollection.merge(collectionL5);
       }
       if (endDate > '2013-01-31') {
         //include L8 collection
         var collectionL8 = app.utils.buscarImagenesPorColeccion(startDate, endDate, app.constants.LANDSAT8_TOA_COLLECTION_ID)
+        var collectionL8Size = collectionL8.size();
+
+        collectionL8 = collectionL8.limit(app.constants.MAX_IMAGES_FOUND);
         imageCollection = imageCollection.merge(collectionL8);
+        imagesTotal = collectionL8Size.add(imagesTotal);
       }
 
       imageCollection = imageCollection.sort('CLOUD_COVER').limit(app.constants.MAX_IMAGES_FOUND);
@@ -403,7 +414,13 @@ app.createHelpers = function () {
 
       imageIDs.evaluate(function (ids) {
         //TODO: cómo renovar las nuevas que se busquen
-        onFoundImagesCallback(ids);
+        imagesTotal = imagesTotal.getInfo();
+
+        var results = {
+          imageIDs: ids,
+          total: imagesTotal,
+        };
+        onFoundImagesCallback(results);
       });
     },
     buscarImagenesPorColeccion: function (startDate, endDate, collectionID) {
@@ -413,7 +430,6 @@ app.createHelpers = function () {
         .filterBounds(Map.getCenter())
         .filterDate(startDate, endDate)
         .sort('CLOUD_COVER')
-        .limit(app.constants.MAX_IMAGES_FOUND)
         ;
 
       return filteredCollection;
@@ -477,11 +493,14 @@ app.createHelpers = function () {
       var startDate = app.model.getStartDate();
       var endDate = app.model.getEndDate();
 
-      app.utils.buscarImagenes(startDate, endDate, function (imageIDs) {
-        imageIDs = imageIDs.map(function (currentValue, i, array) {
+      app.utils.buscarImagenes(startDate, endDate, function (searchResults) {
+        var imageIDs = searchResults.imageIDs.map(function (currentValue, i, array) {
           return currentValue.match('(LT05|LC08)_[0-9]+_[0-9]+')[0]; //Porque obtiene dos: Ejemplo: ["LC08_200035_20181012","LC08"]
         });
+        var imageIDsTotal = imageIDs.length;
+        var total = searchResults.total;
         app.imageSelection.selectWidget.items().reset(imageIDs);
+        app.imageSelection.lbl_findImage.setValue('Showing ' + imageIDsTotal + ' of ' + total + ' found.');
       });
     },
     addImage: function () {
@@ -717,9 +736,9 @@ app.createConstants = function () {
     //TODO: parametize with image
     var visParams;
 
-    if(app.utils.perteneceL8(image)){
+    if (app.utils.perteneceL8(image)) {
       return app.constants.VISUALIZATION_PARAMS_L8_NORMALIZED_NATURAL;
-    } else if (app.utils.perteneceL5(image)){
+    } else if (app.utils.perteneceL5(image)) {
       return app.constants.VISUALIZATION_PARAMS_L5_NORMALIZED_NATURAL
     }
     if (app.constants.IMAGE_COLLECTION_ID = app.constants.LANDSAT8_TOA_COLLECTION_ID) {
