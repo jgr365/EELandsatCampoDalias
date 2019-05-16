@@ -25,7 +25,7 @@ app.createPanels = function () {
       app.intro.title,
       app.intro.description
     ],
-    style: { width: '300px' }
+    
   });
 
   app.bandsSelection = {
@@ -79,6 +79,7 @@ app.createPanels = function () {
     app.bandsSelection.chk_B2,
     app.bandsSelection.chk_B3,
     app.bandsSelection.chk_B4,
+    app.bandsSelection.chk_B5,
     app.bandsSelection.chk_B6,
     app.bandsSelection.chk_B7,
     app.bandsSelection.chk_B8,
@@ -151,6 +152,25 @@ app.createPanels = function () {
     app.imageComparison.slt_imageA,
     app.imageComparison.slt_imageB,
     app.imageComparison.btn_compare
+  ]);
+
+  app.legend = {
+    title: ui.Label('LEGEND:'),
+    lbl_identifyEntry: ui.Label('When calculating the greenhouse area, COLOUR represents:'),
+    lbl_identifyRED: ui.Label('· RED: greenhouse identified pixels'),
+    lbl_comparisonEntry: ui.Label('When comparing images:'),
+    lbl_comparisonWHITE: ui.Label('· WHITE: identified greenhouse pixels common to both images'),
+    lbl_comparisonRED:   ui.Label('· RED: exclusively identified greenhouse pixels in the earliest image'),
+    lbl_comparisonGREEN: ui.Label('· GREEN: exlusively identified greenhouse pixels in the most recent image'),
+  };
+  app.legend.panel = ui.Panel([
+    app.legend.title,
+    app.legend.lbl_identifyEntry,
+    app.legend.lbl_identifyRED,
+    app.legend.lbl_comparisonEntry,
+    app.legend.lbl_comparisonWHITE,
+    app.legend.lbl_comparisonRED,
+    app.legend.lbl_comparisonGREEN,
   ]);
 };
 
@@ -781,14 +801,17 @@ app.boot = function () {
 
   app.bootDrawAreaTool();
 
-  var main = ui.Panel([
-    app.intro.panel,
-    app.bandsSelection.panel,
-    app.imageSelection.panel,
-    app.imageAreaComputation.panel,
-    app.imageComparison.panel
-
-  ]);
+  var main = ui.Panel({
+    widgets: [
+      app.intro.panel,
+      app.bandsSelection.panel,
+      app.imageSelection.panel,
+      app.imageAreaComputation.panel,
+      app.imageComparison.panel,
+      app.legend.panel
+    ],
+    style: { width: '300px' }
+  });
 
   Map.setCenter(-2.74, 36.74, 9);
   ui.root.insert(0, main);
