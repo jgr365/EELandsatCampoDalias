@@ -30,47 +30,47 @@ app.createPanels = function () {
 
   app.bandsSelection = {
     chk_B1: ui.Checkbox({
-      label: 'B1',
+      label: 'L8:B1',
       onChange: app.commands.toggleB1
     }),
     chk_B2: ui.Checkbox({
-      label: 'B2',
+      label: 'L8:B2 y L5:B1',
       onChange: app.commands.toggleB2
     }),
     chk_B3: ui.Checkbox({
-      label: 'B3',
+      label: 'L8:B3 y L5:B2',
       onChange: app.commands.toggleB3
     }),
     chk_B4: ui.Checkbox({
-      label: 'B4',
+      label: 'L8:B4 y L5:B3',
       onChange: app.commands.toggleB4
     }),
     chk_B5: ui.Checkbox({
-      label: 'B5',
+      label: 'L8:B5 y L5:B4',
       onChange: app.commands.toggleB5
     }),
     chk_B6: ui.Checkbox({
-      label: 'B6',
+      label: 'L8:B6 y L5:B5',
       onChange: app.commands.toggleB6
     }),
     chk_B7: ui.Checkbox({
-      label: 'B7',
+      label: 'L8:B7 y L5:B7',
       onChange: app.commands.toggleB7
     }),
     chk_B8: ui.Checkbox({
-      label: 'B8',
+      label: 'L8:B8',
       onChange: app.commands.toggleB8
     }),
     chk_B9: ui.Checkbox({
-      label: 'B9',
+      label: 'L8:B9',
       onChange: app.commands.toggleB9
     }),
     chk_B10: ui.Checkbox({
-      label: 'B10',
+      label: 'L8:B10 y L5:B6',
       onChange: app.commands.toggleB10
     }),
     chk_B11: ui.Checkbox({
-      label: 'B11',
+      label: 'L8:B11 y L5:B6',
       onChange: app.commands.toggleB11
     })
   };
@@ -157,7 +157,7 @@ app.createPanels = function () {
   app.legend = {
     title: ui.Label('LEGEND:'),
     lbl_identifyEntry: ui.Label('When calculating the greenhouse area, COLOUR represents:'),
-    lbl_identifyRED: ui.Label('· RED: greenhouse identified pixels'),
+    lbl_identifyRED: ui.Label('· WHITE: greenhouse identified pixels'),
     lbl_comparisonEntry: ui.Label('When comparing images:'),
     lbl_comparisonWHITE: ui.Label('· WHITE: identified greenhouse pixels common to both images'),
     lbl_comparisonRED:   ui.Label('· RED: exclusively identified greenhouse pixels in the earliest image'),
