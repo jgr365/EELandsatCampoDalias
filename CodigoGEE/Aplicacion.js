@@ -308,7 +308,32 @@ app.createHelpers = function () {
         bandsToUseForIdentification.push('B11');
       }
 
+      if(app.model.useL5B1){
+        bandsToUseForIdentification.push('B1');
+      }
+      if(app.model.useL5B2){
+        bandsToUseForIdentification.push('B2');
+      }
+      if(app.model.useL5B3){
+        bandsToUseForIdentification.push('B3');
+      }
+      if(app.model.useL5B4){
+        bandsToUseForIdentification.push('B4');
+      }
+      if(app.model.useL5B5){
+        bandsToUseForIdentification.push('B5');
+      }
+      if(app.model.useL5B6){
+        bandsToUseForIdentification.push('B6');
+      }
+      if(app.model.useL5B7){
+        bandsToUseForIdentification.push('B7');
+      }
+      if(app.model.useL5B8){
+        bandsToUseForIdentification.push('B8');
+      }
 
+      
       InvernaderosImage = app.utils.detectarInvernaderosUsandoLasBandas(image, region, bandsToUseForIdentification, rangesPerBand);
       return InvernaderosImage;
     },
@@ -583,34 +608,52 @@ app.createHelpers = function () {
       var newValue = app.model.useL8B1 = app.bandsSelection.chk_B1.getValue();
     },
     toggleB2: function () {
-      var newValue = app.model.useL8B2 = app.bandsSelection.chk_B2.getValue();
+      var newValue = app.bandsSelection.chk_B2.getValue();
+      app.model.useL8B2 = newValue;
+      app.model.useL5B1 = newValue;
     },
     toggleB3: function () {
-      var newValue = app.model.useL8B3 = app.bandsSelection.chk_B3.getValue();
+      var newValue = app.bandsSelection.chk_B3.getValue();
+      app.model.useL8B3 = newValue;
+      app.model.useL5B2 = newValue;
     },
     toggleB4: function () {
-      var newValue = app.model.useL8B4 = app.bandsSelection.chk_B4.getValue();
+      var newValue = app.bandsSelection.chk_B4.getValue();
+      app.model.useL8B4 = newValue;
+      app.model.useL5B3 = newValue;
     },
     toggleB5: function () {
-      var newValue = app.model.useL8B5 = app.bandsSelection.chk_B5.getValue();
+      var newValue = app.bandsSelection.chk_B5.getValue();
+      app.model.useL8B5 = newValue;
+      app.model.useL5B4 = newValue;
     },
     toggleB6: function () {
-      var newValue = app.model.useL8B6 = app.bandsSelection.chk_B6.getValue();
+      var newValue = app.bandsSelection.chk_B6.getValue();
+      app.model.useL8B6 = newValue;
+      app.model.useL5B5 = newValue;
     },
     toggleB7: function () {
-      var newValue = app.model.useL8B7 = app.bandsSelection.chk_B7.getValue();
+      var newValue = app.bandsSelection.chk_B7.getValue();
+      app.model.useL8B7 = newValue;
+      app.model.useL5B7 = newValue;
     },
     toggleB8: function () {
-      var newValue = app.model.useL8B8 = app.bandsSelection.chk_B8.getValue();
+      var newValue = app.bandsSelection.chk_B8.getValue();
+      app.model.useL8B8 = newValue;
+      app.model.useL5B8 = newValue;
     },
     toggleB9: function () {
       var newValue = app.model.useL8B9 = app.bandsSelection.chk_B9.getValue();
     },
-    toggleB100: function () {
-      var newValue = app.model.useL8B10 = app.bandsSelection.chk_B10.getValue();
+    toggleB10: function () {
+      var newValue = app.bandsSelection.chk_B10.getValue();
+      app.model.useL8B10 = newValue;
+      app.model.useL5B6  = newValue;
     },
     toggleB11: function () {
-      var newValue = app.model.useL8B11 = app.bandsSelection.chk_B11.getValue();
+      var newValue = app.bandsSelection.chk_B11.getValue();
+      app.model.useL8B11 = newValue;
+      app.model.useL5B6  = newValue;
     }
 
   };
@@ -645,6 +688,15 @@ app.createConstants = function () {
     useL8B9: false,
     useL8B10: false,
     useL8B11: false,
+
+    useL5B1: false,
+    useL5B2: false,
+    useL5B3: false,
+    useL5B4: false,
+    useL5B5: false,
+    useL5B6: false,
+    useL5B7: false,
+    useL5B8: false,
   };
   app.model.selectedImages = [];
   app.model.getRangesPerBand = function () {
@@ -759,7 +811,7 @@ app.createConstants = function () {
     if (app.utils.perteneceL8(image)) {
       return app.constants.VISUALIZATION_PARAMS_L8_NORMALIZED_NATURAL;
     } else if (app.utils.perteneceL5(image)) {
-      return app.constants.VISUALIZATION_PARAMS_L5_NORMALIZED_NATURAL
+      return app.constants.VISUALIZATION_PARAMS_L5_NORMALIZED_NATURAL;
     }
     if (app.constants.IMAGE_COLLECTION_ID = app.constants.LANDSAT8_TOA_COLLECTION_ID) {
       visParams = app.constants.VISUALIZATION_PARAMS_L8_NORMALIZED_NATURAL;
