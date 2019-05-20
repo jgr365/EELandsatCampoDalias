@@ -15,10 +15,10 @@ var app = {};
 app.createPanels = function () {
   app.intro = {
     title: ui.Label({
-      value: 'TITLE',
+      value: 'GREENHOUSE AREA IDENTIFICATION AND COMPUTATION',
       style: { fontWeight: 'bold' }
     }),
-    description: ui.Label('App description')
+    description: ui.Label('This tool will help you take advantage of satellite imagery from Landsat 5 and 8 in order to explore greenhouse area evolution. Here are the available bands to use for identification...')
   };
   app.intro.panel = ui.Panel({
     widgets: [
