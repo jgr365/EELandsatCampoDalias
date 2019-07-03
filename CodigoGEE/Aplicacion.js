@@ -408,7 +408,6 @@ app.createHelpers = function () {
           dimension: bucket index : [ bucket min value, frecuency]
         */
         var areaCoveredInPixels;
-        Map.addLayer(image);
 
         if (dictionary[bandID] === null) {
           areaCoveredInPixels = 0;
