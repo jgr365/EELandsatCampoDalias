@@ -493,8 +493,8 @@ app.createHelpers = function () {
 
       var comunes = invernaderosA.or(invernaderosB);
       comunes = comunes.clip(region);
-      invernaderosAsinB = invernaderosA.bitwiseXor(comunes);
-      invernaderosBsinA = invernaderosB.bitwiseXor(comunes);
+      invernaderosAsinB = invernaderosB.bitwiseXor(comunes);
+      invernaderosBsinA = invernaderosA.bitwiseXor(comunes);
 
       var invernaderosAsinBMasked = invernaderosAsinB.updateMask(invernaderosAsinB);
       var invernaderosBsinAMasked = invernaderosBsinA.updateMask(invernaderosBsinA);
