@@ -383,37 +383,40 @@ app.createHelpers = function () {
 
       return unionThresholdImage;
     },
-    calcularAreaInvernada: function (image, region, rangesPerBand) {
+    calcularAreaInvernada: function (image, region) {
       //COMPUTE AREA BASED ON HISTOGRAM
-      var bandID = 'B3';
-      var minIndex = 'min';
-      var maxIndex = 'max';
-      var minValue = rangesPerBand[bandID][minIndex];
-      var maxValue = rangesPerBand[bandID][maxIndex];
-      var reducer = ee.Reducer.fixedHistogram(minValue, maxValue, 1);
+      var bandID =  image.bandNames().getInfo()[0];
+      var minValue = 0;
+      var maxValue = 1;
+      var fixedHistogramAdjustment = 1;
+      var reducer = ee.Reducer.fixedHistogram(minValue, maxValue+fixedHistogramAdjustment, 2);
 
-      image = image.select(bandID);
-      var upperFilteringMask = image.gt(minValue);
-      var lowerFilteringMask = image.lt(maxValue);
-      var combinedFilteringMask = upperFilteringMask.and(lowerFilteringMask);
-      var masked = image.updateMask(combinedFilteringMask);
-      image = masked;
       var reduced = image.reduceRegion(reducer, region);
 
 
 
       var areaCovered;
-      var pixelArea = 900.0;
+      var pixelArea = app.model.getPixelAreaComputadaSegunBandasUtilizadas();
       reduced.evaluate(function (dictionary) {
 
-        var pixelsInRangePerBand;
+        /*
+          dictionary is an object with:
+          key: for band Name
+          value: for each "bucket"
+          
+          Each "bucket" is a bidimensional array formed by:
+          dimension: bucket index : [ bucket min value, frecuency]
+        */
+        var areaCoveredInPixels;
+        Map.addLayer(image);
+
         if (dictionary[bandID] === null) {
-          pixelsInRangePerBand = 0;
+          areaCoveredInPixels = 0;
         } else {
-          pixelsInRangePerBand = dictionary[bandID][0][1];
+          areaCoveredInPixels = dictionary[bandID][0][1];
         }
 
-        var areaCoveredInMeters = pixelsInRangePerBand * pixelArea;
+        var areaCoveredInMeters = areaCoveredInPixels * pixelArea;
         var areaCoveredInHectares = areaCoveredInMeters / 10000.0;
         areaCovered = areaCoveredInHectares;
 
@@ -425,7 +428,7 @@ app.createHelpers = function () {
     comunicarAreaCalculada: function (areaExtension) {
       // var areaAsIntValue = parseInt(areaExtension);
       areaExtension = areaExtension.toFixed(2);
-      app.imageAreaComputation.lbl_areaResult.setValue('GreenHose Area (in ha): ' + areaExtension);
+      app.imageAreaComputation.lbl_areaResult.setValue('GreenHouse Area (in ha): ' + areaExtension);
     },
     buscarImagenes: function (startDate, endDate, onFoundImagesCallback) {
       //LANDSAT 5: MAR-84 -> JAN-2013
@@ -490,8 +493,8 @@ app.createHelpers = function () {
 
       var comunes = invernaderosA.or(invernaderosB);
       comunes = comunes.clip(region);
-      invernaderosAsinB = invernaderosA.bitwiseXor(comunes);
-      invernaderosBsinA = invernaderosB.bitwiseXor(comunes);
+      invernaderosAsinB = invernaderosB.bitwiseXor(comunes);
+      invernaderosBsinA = invernaderosA.bitwiseXor(comunes);
 
       var invernaderosAsinBMasked = invernaderosAsinB.updateMask(invernaderosAsinB);
       var invernaderosBsinAMasked = invernaderosBsinA.updateMask(invernaderosBsinA);
@@ -582,7 +585,7 @@ app.createHelpers = function () {
       app.utils.dibujarImagen(invernaderos, {}, 'invernaderos localizados');
 
 
-      app.utils.calcularAreaInvernada(image, region, rangesPerBand);
+      app.utils.calcularAreaInvernada(invernaderos, region);
     },
     compareImages: function () {
       var imageA = app.imageComparison.slt_imageA.getValue();
@@ -664,6 +667,24 @@ app.createConstants = function () {
   var _explorationZone = geometry;
 
   app.constants = {
+    L8B1: 'L8B1',
+    L8B2: 'L8B2',
+    L8B3: 'L8B3',
+    L8B4: 'L8B4',
+    L8B5: 'L8B5',
+    L8B6: 'L8B6',
+    L8B7: 'L8B7',
+    L8B8: 'L8B8',
+    L8B9: 'L8B9',
+    L8B10: 'L8B10',
+    L8B11: 'L8B11',
+    L5B1: 'L5B1',
+    L5B2: 'L5B2',
+    L5B3: 'L5B3',
+    L5B4: 'L5B4',
+    L5B5: 'L5B5',
+    L5B6: 'L5B6',
+    L5B7: 'L5B7',
     MAX_IMAGES_FOUND: 10,
     LANDSAT5_TOA_COLLECTION_ID: 'LANDSAT/LT05/C01/T1_TOA',
     LANDSAT8_TOA_COLLECTION_ID: 'LANDSAT/LC08/C01/T1_RT_TOA',
@@ -809,7 +830,84 @@ app.createConstants = function () {
     } else if (app.utils.perteneceL5(image)) {
       return app.constants.LANDSAT5_TOA_COLLECTION_ID;
     }
-  }
+  };
+  app.model.getCurrentlyUsedBands = function (filteringFunction) {
+    var usedBands = [];
+    if(app.model.useL5B1){
+      usedBands.push(app.constants.L5B1);
+    }
+    if(app.model.useL5B2){
+      usedBands.push(app.constants.L5B2);
+    }
+    if(app.model.useL5B3){
+      usedBands.push(app.constants.L5B3);
+    }
+    if(app.model.useL5B4){
+      usedBands.push(app.constants.L5B4);
+    }
+    if(app.model.useL5B5){
+      usedBands.push(app.constants.L5B5);
+    }
+    if(app.model.useL5B6){
+      usedBands.push(app.constants.L5B6);
+    }
+    if(app.model.useL5B7){
+      usedBands.push(app.constants.L5B7);
+    }
+    if(app.model.useL8B1){
+      usedBands.push(app.constants.L8B1);
+    }
+    if(app.model.useL8B2){
+      usedBands.push(app.constants.L8B2);
+    }
+    if(app.model.useL8B3){
+      usedBands.push(app.constants.L8B3);
+    }
+    if(app.model.useL8B4){
+      usedBands.push(app.constants.L8B4);
+    }
+    if(app.model.useL8B5){
+      usedBands.push(app.constants.L8B5);
+    }
+    if(app.model.useL8B6){
+      usedBands.push(app.constants.L8B6);
+    }
+    if(app.model.useL8B7){
+      usedBands.push(app.constants.L8B7);
+    }
+    if(app.model.useL8B8){
+      usedBands.push(app.constants.L8B8);
+    }
+    if(app.model.useL8B9){
+      usedBands.push(app.constants.L8B9);
+    }
+    if(app.model.useL8B10){
+      usedBands.push(app.constants.L8B10);
+    }
+    if(app.model.useL8B11){
+      usedBands.push(app.constants.L8B11);
+    }
+
+    return usedBands.filter(filteringFunction);
+  };
+  app.model.isUsingBand = function (band) {
+    return app.model.getCurrentlyUsedBands().includes(band);
+  };
+  app.model.getPixelAreaComputadaSegunBandasUtilizadas = function () {
+    var resolucionL8B8 = 15*15;
+    var resolucionL8MayoriaBandas = 30*30;
+
+    var isUsandoL8B8yCualquierOtraDeL8;
+    var filtradoConBandasL8_function = function (sateliteIDBandaID) {
+      return sateliteIDBandaID.indexOf('L8') === -1;
+    };
+    isUsandoL8B8yCualquierOtraDeL8 = app.model.getCurrentlyUsedBands(filtradoConBandasL8_function);
+    if(isUsandoL8B8yCualquierOtraDeL8){
+      return resolucionL8MayoriaBandas;
+    } else {
+      return resolucionL8B8;
+    }
+  };
 };
 
 app.bootDrawAreaTool = function () {
